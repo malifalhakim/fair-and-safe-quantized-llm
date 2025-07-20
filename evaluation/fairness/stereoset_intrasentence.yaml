@@ -1,0 +1,22 @@
+task: stereoset_intrasentence
+task_alias: StereoSet (intrasentence)
+dataset_path: McGill-NLP/stereoset
+dataset_name: intrasentence
+validation_split: validation
+output_type: multiple_choice
+process_docs: !function stereoset_task.process_docs_intrasentence
+doc_to_text: "{{context}}"
+doc_to_target:
+  - "{{first_sentence}}"
+  - "{{second_sentence}}"
+  - "{{third_sentence}}"
+metric_list:
+  - metric: stereoset_lms
+    aggregation: mean
+    higher_is_better: true
+  - metric: stereoset_ss
+    aggregation: mean
+    higher_is_better: false
+  - metric: stereoset_icat
+    aggregation: mean
+    higher_is_better: true
