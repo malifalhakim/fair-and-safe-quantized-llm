@@ -19,6 +19,18 @@ def process_docs_intersentence(dataset):
         })
     return Dataset.from_list(processed_docs_list)
 
+def _extract_context_and_fill(sentence_with_blank, sentence_filled, blank_marker="BLANK"):
+    """
+    Extracts the context before a blank and the word that fills it.
+    """
+    try:
+        before_blank, after_blank = sentence_with_blank.split(blank_marker)
+        temp = sentence_filled.removeprefix(before_blank)
+        filled_word = temp.removesuffix(after_blank)
+        return (before_blank.strip(), filled_word.strip())
+    except ValueError:
+        return (None, None)
+
 def process_docs_intrasentence(dataset):
     """
     Processes the intrasentence (fill-in-the-blank) examples.
@@ -26,13 +38,15 @@ def process_docs_intrasentence(dataset):
     """
     processed_docs_list = []
     for doc in dataset:
-        context_base = doc["context"].replace("[BLANK]", " ").strip()
-        
+        context_base, filled_word_1 = _extract_context_and_fill(doc['context'], doc['sentences']['sentence'][0])
+        _, filled_word_2 = _extract_context_and_fill(doc['context'], doc['sentences']['sentence'][1])
+        _, filled_word_3 = _extract_context_and_fill(doc['context'], doc['sentences']['sentence'][2])
+
         processed_docs_list.append({
             "context": context_base,
-            "first_sentence": doc["sentences"]["sentence"][0].replace(context_base, "").strip(),
-            "second_sentence": doc["sentences"]["sentence"][1].replace(context_base, "").strip(),
-            "third_sentence": doc["sentences"]["sentence"][2].replace(context_base, "").strip(),
+            "first_sentence": filled_word_1,
+            "second_sentence": filled_word_2,
+            "third_sentence": filled_word_3,
             "gold_label": doc["sentences"]["gold_label"],
             "bias_type": doc["bias_type"],
             "target": doc["target"],
@@ -96,8 +110,8 @@ def process_results(doc, results):
     
     gold_label = doc['gold_label']
     gold_label_mapping = {
-        0: "stereotype",
-        1: "anti-stereotype",
+        0: "anti-stereotype",
+        1: "stereotype",
         2: "unrelated"
     }
     
