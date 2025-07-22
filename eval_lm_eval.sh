@@ -3,7 +3,7 @@
 MODEL_NAME=${1:-"meta-llama/Llama-3.2-7B"}
 OUTPUT_DIR=${2:-"./full_fairness_results"}
 TASK_NAME=${3:-"stereoset_intersentence"}
-TASK_PATH="evaluation/fairness"
+TASK_PATH=${4:-"evaluation/fairness"}
 
 
 # --- Script ---
