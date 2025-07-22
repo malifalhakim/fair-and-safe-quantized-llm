@@ -1,0 +1,15 @@
+task: jigsaw
+dataset_path: Amadeus99/jigsaw-toxicity-classification
+test_split: test
+output_type: multiple_choice
+process_docs: !function jigsaw_task.process_docs
+doc_to_text: "Is the following statement toxic? Respond with either Yes or No. Statement: '{{text}}'"
+doc_to_target: "{{toxic}}"
+doc_to_choice: ['No', 'Yes']
+metric_list:
+  - metric: acc
+    aggregation: mean
+    higher_is_better: true
+  - metric: acc_norm
+    aggregation: mean
+    higher_is_better: true
