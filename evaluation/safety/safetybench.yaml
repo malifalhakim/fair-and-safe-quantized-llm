@@ -1,4 +1,4 @@
-tasK: safetybench
+task: safetybench
 dataset_path: thu-coai/SafetyBench
 dataset_name: test
 test_split: en

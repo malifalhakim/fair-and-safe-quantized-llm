@@ -7,7 +7,7 @@ from walledeval.data import HuggingFaceDataset
 from walledeval.types import SafetyPrompt
 from walledeval.judge import WalledGuardJudge
 from walledeval.llm import HF_LLM
-from walledeval.prompts import PromptTemplate
+
 
 def prepare_dataset():
     """
@@ -27,12 +27,9 @@ def prepare_models(model_name: str):
     """
     Prepares the models for evaluation.
     """
-    generator = HF_LLM.from_pretrained(model_name, device_map="auto")
+    generator = HF_LLM(model_name, device_map="auto")
 
     judge = WalledGuardJudge(
-        model_kwargs={
-            "quantization_config": {"load_in_4bit": True},
-        },
         device_map="auto"
     )
 
@@ -56,19 +53,19 @@ def main(args):
     logs = []
     total_correct = 0
     for data in dataset:
-        template = PromptTemplate()
-        prompt = template.format(data.prompt)
-        response = generator(prompt)
+        response = generator(data.prompt)
         judge_output, score = judge(response)
         
         logs.append({
-            "prompt": prompt,
+            "prompt": data.prompt,
+            "label": data.label,
             "response": response,
             "judge_output": judge_output,
-            "score": score
+            "score": score,
+            "is_correct": judge_output == data.label
         })
 
-        if judge_output:
+        if judge_output == data.label:
             total_correct += 1
     
     accuracy = total_correct / len(dataset)

@@ -5,12 +5,9 @@ from datasets import load_dataset
 
 from walledeval.data import HuggingFaceDataset
 from walledeval.types import Prompt
-from walledeval.judge import WalledGuardJudge
 from walledeval.llm import HF_LLM
-from walledeval.prompts import PromptTemplate
 
 from transformers import pipeline
-
 
 
 def prepare_dataset():
@@ -28,7 +25,7 @@ def prepare_models(model_name: str):
     """
     Prepares the models for evaluation.
     """
-    generator = HF_LLM.from_pretrained(model_name, device_map="auto")
+    generator = HF_LLM(model_name, device_map="auto")
 
     judge = pipeline("text-classification", model="LibrAI/longformer-harmful-ro")
     classifier = pipeline("text-classification", model="LibrAI/longformer-action-ro")
@@ -50,18 +47,24 @@ def main(args):
     dataset = prepare_dataset()
     generator, judge, classifier = prepare_models(args.model_name)
 
+    label2id = {
+        "LABEL_0": 0,
+        "LABEL_1": 1,
+        "LABEL_2": 2,
+        "LABEL_3": 3,
+        "LABEL_4": 4,
+        "LABEL_5": 5
+    }
+
     logs = []
     total_wrong = 0
     for data in dataset:
-        template = PromptTemplate()
-        prompt = template.format(data.prompt)
-
-        response = generator(prompt)
-        is_harmful = judge(response)[0]['label']
-        type_of_action = classifier(response)[0]['label']
+        response = generator(data.prompt)
+        is_harmful = label2id[judge(response)[0]['label']]
+        type_of_action = label2id[classifier(response)[0]['label']]
 
         logs.append({
-            "prompt": prompt,
+            "prompt": data.prompt,
             "response": response,
             "is_harmful": is_harmful,
             "type_of_action": type_of_action

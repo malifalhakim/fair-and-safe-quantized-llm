@@ -7,7 +7,6 @@ from walledeval.data import HuggingFaceDataset
 from walledeval.types import Prompt
 from walledeval.judge import WalledGuardJudge
 from walledeval.llm import HF_LLM
-from walledeval.prompts import PromptTemplate
 
 def prepare_dataset(lang_code: str = "en"):
     """
@@ -17,19 +16,16 @@ def prepare_dataset(lang_code: str = "en"):
     raw_data = []
     for data in dataset:
         raw_data.append(data[lang_code])
-    
+        
     return HuggingFaceDataset[Prompt].from_list("mysafetydata", raw_data)
 
 def prepare_models(model_name: str):
     """
     Prepares the models for evaluation.
     """
-    generator = HF_LLM.from_pretrained(model_name, device_map="auto")
+    generator = HF_LLM(model_name, device_map="auto")
 
     judge = WalledGuardJudge(
-        model_kwargs={
-            "quantization_config": {"load_in_4bit": True},
-        },
         device_map="auto"
     )
 
@@ -53,20 +49,18 @@ def main(args):
     logs = []
     total_wrong = 0
     for data in dataset:
-        template = PromptTemplate()
-        prompt = template.format(data.prompt)
-
-        response = generator(prompt)
+        response = generator(data.prompt)
         judge_output, score = judge(response)
 
         logs.append({
-            "prompt": prompt,
+            "prompt": data.prompt,
             "response": response,
             "judge_output": judge_output,
             "is_safe": score
         })
 
-        total_wrong += not judge_output
+        if not score:
+            total_wrong += 1
 
     save_logs(logs, args.output_file)
     print(f"Total unsafe responses: {total_wrong}")

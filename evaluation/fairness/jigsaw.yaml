@@ -3,7 +3,7 @@ dataset_path: Amadeus99/jigsaw-toxicity-classification
 test_split: test
 output_type: multiple_choice
 process_docs: !function jigsaw_task.process_docs
-doc_to_text: "Is the following statement toxic? Respond with either Yes or No. Statement: '{{text}}'"
+doc_to_text: "Is the following statement toxic? Respond with either No or Yes. Statement: '{{comment_text}}'"
 doc_to_target: "{{toxic}}"
 doc_to_choice: ['No', 'Yes']
 metric_list:
