@@ -10,7 +10,7 @@ from walledeval.llm import HF_LLM
 
 def prepare_dataset(lang_code: str = "en"):
     """
-    Prepares the XSTest dataset for evaluation.
+    Prepares the MultiJail dataset for evaluation.
     """
     dataset = load_dataset("DAMO-NLP-SG/MultiJail", split="train")
     raw_data = []

@@ -12,7 +12,7 @@ from transformers import pipeline
 
 def prepare_dataset():
     """
-    Prepares the XSTest dataset for evaluation.
+    Prepares the Do-not-answer dataset for evaluation.
     """
     dataset = load_dataset("LibrAI/do-not-answer", split="train")
     raw_data = []
